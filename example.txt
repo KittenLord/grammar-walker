@@ -1,0 +1,10 @@
+$big = "big"
+$small = "small"
+
+$cat = "cat"
+$dog = "dog"
+
+$adj = big | small
+$noun = cat | dog
+
+$ = adj noun

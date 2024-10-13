@@ -36,7 +36,7 @@ data Rule = Rule NT [Production]
 data Production = Production [Symbol]
     deriving (Eq, Show)
 
-data Symbol = Terminal String | Nonterminal String
+data Symbol = Terminal [RItem] | Nonterminal String
     deriving (Eq, Show)
 
 
@@ -120,15 +120,17 @@ consumeSymbols g tokens = res
           go' :: Grammar -> [Symbol] -> [GToken] -> ([GToken], [Symbol])
           go' g acc t@((SymbolId sname):rest) = go' g (acc ++ [symbol]) rest
               where symbol = findSymbolInGrammar g sname
-          go' g acc t@((TerminalStr gen):rest) = go' g (acc ++ [Terminal gen]) rest
+          go' g acc t@((TerminalStr gen):rest) = go' g (acc ++ [Terminal regex]) rest
+              where (Just regex) = parseRegex [] gen
           go' g acc t = (t, acc)
 
           res = go g [] tokens
 
 findSymbolInGrammar :: Grammar -> String -> Symbol
-findSymbolInGrammar (Grammar _ defs _) sname = if isNothing def then Nonterminal sname else Terminal gen
+findSymbolInGrammar (Grammar _ defs _) sname = if isNothing def then Nonterminal sname else Terminal regex
     where def = find (\(Definition t _) -> t == sname) defs
           (Just (Definition _ gen)) = def
+          (Just regex) = parseRegex [] gen
 
 
 
@@ -152,10 +154,53 @@ expandSymbol g@(Grammar _ _ rules) (Nonterminal t) = do
     expandProduction g prod
           
 
--- TODO: Implement
-generateSymbol :: Gen -> IO String
-generateSymbol gen = do
-    return gen
+
+generateSymbol :: [RItem] -> IO String
+generateSymbol gen = (sequenceA $ map generateRItem gen) >>= (return . join)
+
+generateRItem :: RItem -> IO String
+generateRItem (RChar c) = return [c]
+generateRItem (RQ rg) = do
+    r' <- randomIO :: IO Int
+    let r = (r' `mod` 2) == 0
+    if r then generateRItem rg else return []
+generateRItem (RAtLeast rg) = do
+    r' <- randomIO :: IO Int
+    let r = 1 + (r' `mod` 9)
+    let list = map (\_ -> generateRItem rg) [0..r]
+    (sequenceA list) >>= (return . join)
+generateRItem (RAny rg) = do
+    r' <- randomIO :: IO Int
+    let r = (r' `mod` 10)
+    let list = map (\_ -> generateRItem rg) [0..r]
+    (sequenceA list) >>= (return . join)
+
+generateRItem (RCode "d") = do
+    r' <- randomIO :: IO Int
+    let r = r' `mod` 10
+    return $ show r
+
+
+
+data RItem = RChar Char
+           -- | RBlock RItem
+           | RQ RItem
+           | RAtLeast RItem
+           | RAny RItem
+           -- | RChoice [RItem]
+           | RCode String
+    deriving (Eq, Show)
+
+parseRegex :: [RItem] -> String -> Maybe [RItem]
+parseRegex rs ('{':xs) = parseRegex (r:rs) cs 
+    where (code, '}':cs) = break (== '}') xs
+          r = RCode code
+parseRegex (r:rs) ('?':cs) = parseRegex ((RQ r):rs) cs
+parseRegex (r:rs) ('*':cs) = parseRegex ((RAny r):rs) cs
+parseRegex (r:rs) ('+':cs) = parseRegex ((RAtLeast r):rs) cs
+
+parseRegex rs (x:xs) = parseRegex ((RChar x):rs) xs
+parseRegex rs [] = Just $ reverse rs
 
 
 

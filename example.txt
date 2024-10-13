@@ -1,7 +1,7 @@
 $if = $"if"
 $then = $"then"
 $else = $"else"
-$num = $"{num}"
+$num = $"{d}+"
 $eq = $"=="
 
 $ = if expr then expr else expr

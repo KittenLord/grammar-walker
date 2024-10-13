@@ -154,6 +154,12 @@ expandSymbol g@(Grammar _ _ rules) (Nonterminal t) = do
     expandProduction g prod
           
 
+pickRandom :: [a] -> IO a
+pickRandom xs = do
+    r' <- randomIO :: IO Int
+    let r = r' `mod` length xs
+    return $ xs !! r
+
 
 generateSymbol :: [RItem] -> IO String
 generateSymbol gen = (sequenceA $ map generateRItem gen) >>= (return . join)
@@ -179,6 +185,12 @@ generateRItem (RCode "d") = do
     r' <- randomIO :: IO Int
     let r = r' `mod` 10
     return $ show r
+generateRItem (RCode "a") = singleton <$> pickRandom ['a'..'z']
+
+generateRItem (RCode "((") = return "{"
+generateRItem (RCode "))") = return "}"
+generateRItem (RCode "(") = return "("
+generateRItem (RCode ")") = return ")"
 
 
 

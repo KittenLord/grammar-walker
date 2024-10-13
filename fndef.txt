@@ -1,0 +1,15 @@
+$fn = $"fn"
+$id = $"{a}*"
+$lparen = $"{(}"
+$rparen = $"{)}"
+$lcurly = $"{((}"
+$rcurly = $"{))}"
+$comma = $","
+$type = $":"
+
+$fndef = fn id lparen fnargs rparen lcurly rcurly
+
+$fnargs = id type id
+        | fnargs comma fnargs
+
+$ = fndef

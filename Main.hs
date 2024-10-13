@@ -1,10 +1,10 @@
 {-
 
-$if = "if"
-$then = "then"
-$else = "else"
-$num = "{num}"
-$eq = "=="
+$if = $"if"
+$then = $"then"
+$else = $"else"
+$num = $"{num}"
+$eq = $"=="
 
 $ = if expr then expr else expr
 
@@ -97,7 +97,7 @@ getTokenStream input = token : getTokenStream rest
 
 parseGrammar :: Grammar -> [GToken] -> Maybe Grammar
 parseGrammar g (EOF:_) = Just g
-parseGrammar g ((TerminalDef t):(ProdEq):(TerminalStr def):rest) = parseGrammar (ng <> g) rest
+parseGrammar g ((TerminalDef t):(ProdEq):(TerminalDef "#Goal"):(TerminalStr def):rest) = parseGrammar (ng <> g) rest
     where ng = Grammar (Production []) [Definition t def] []
 parseGrammar g ((TerminalDef t):(ProdEq):rest) = parseGrammar (ng <> g) nrest
     where (nrest, consumed) = consumeSymbols g rest
@@ -113,11 +113,14 @@ consumeSymbols g tokens = res
           go g acc t@(ProdOr:rest) = go g acc rest
           go g acc t@((SymbolId _):_) = go g (acc ++ [nacc]) rest
               where (rest, nacc) = go' g [] t
+          go g acc t@((TerminalStr _):_) = go g (acc ++ [nacc]) rest
+              where (rest, nacc) = go' g [] t
           go g acc t = (t, acc)
 
           go' :: Grammar -> [Symbol] -> [GToken] -> ([GToken], [Symbol])
           go' g acc t@((SymbolId sname):rest) = go' g (acc ++ [symbol]) rest
               where symbol = findSymbolInGrammar g sname
+          go' g acc t@((TerminalStr gen):rest) = go' g (acc ++ [Terminal gen]) rest
           go' g acc t = (t, acc)
 
           res = go g [] tokens

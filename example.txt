@@ -1,34 +1,9 @@
-$WITH = "with"
-$ONTHESIDE = "on the side"
-$CRISPY = "crispy"
-$BACON = "bacon"
-$SAUSAGE = "sausage"
-$EGGS = "eggs"
-$REALLY = "really"
-$SCRAMBLED = "scrambled"
-$POACHED = "poached"
-$FRIED = "fried"
-$TOAST = "toast"
-$BISCUITS = "biscuits"
-$ENGLISHMUFFIN = "English muffin"
+$if = $"if"
+$then = $"then"
+$else = $"else"
+$num = $"{num}"
+$eq = $"=="
 
-$breakfast = protein WITH breakfast ONTHESIDE
-           | protein
-           | bread
+$ = if expr then expr else expr
 
-$protein = crispiness CRISPY BACON
-         | SAUSAGE
-         | cooked EGGS
-
-$crispiness = REALLY
-            | REALLY crispiness
-
-$cooked = SCRAMBLED
-        | POACHED
-        | FRIED
-
-$bread = TOAST
-       | BISCUITS
-       | ENGLISHMUFFIN
-
-$ = breakfast
+$expr = num | num eq num

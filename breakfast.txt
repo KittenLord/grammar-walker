@@ -1,34 +1,20 @@
-$WITH = "with"
-$ONTHESIDE = "on the side"
-$CRISPY = "crispy"
-$BACON = "bacon"
-$SAUSAGE = "sausage"
-$EGGS = "eggs"
-$REALLY = "really"
-$SCRAMBLED = "scrambled"
-$POACHED = "poached"
-$FRIED = "fried"
-$TOAST = "toast"
-$BISCUITS = "biscuits"
-$ENGLISHMUFFIN = "English muffin"
-
-$breakfast = protein WITH breakfast ONTHESIDE
+$breakfast = protein "with" breakfast "on the side"
            | protein
            | bread
 
-$protein = crispiness CRISPY BACON
-         | SAUSAGE
-         | cooked EGGS
+$protein = crispiness "crispy" "bacon"
+         | "sausage"
+         | cooked "eggs"
 
-$crispiness = REALLY
-            | REALLY crispiness
+$crispiness = "really"
+            | "really" crispiness
 
-$cooked = SCRAMBLED
-        | POACHED
-        | FRIED
+$cooked = "scrambled"
+        | "poached"
+        | "fried"
 
-$bread = TOAST
-       | BISCUITS
-       | ENGLISHMUFFIN
+$bread = "toast"
+       | "biscuits"
+       | "english muffin"
 
 $ = breakfast

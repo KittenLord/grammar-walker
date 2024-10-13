@@ -1,4 +1,5 @@
 -- some stuff looks messy, but it's to adjust probabilities
+-- also most results don't even remotely look like japanese, but oh well
 
 $vowel = "a" | "e" | "o" | "u" | "i"
 $yvowel = "a" | "u" | "o"
@@ -10,7 +11,7 @@ $doublecons = "kk" | "ss" | "tt" | "pp"
 
 $g = completecons vowel
 $gg = doublecons vowel
-$syllable = "n" | "y" yvowel | "w" wvowel | g | g | g | g | gg | gg
+$syllable = "n" | "y" yvowel | "w" wvowel | g | g | g | g | g | g | g | gg | gg
 
 $word = syllable
       | syllable word

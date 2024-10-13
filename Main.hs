@@ -223,4 +223,8 @@ main = do
     grammarText <- hGetContents handle
     let (Just grammar) = parseGrammar mempty (getTokenStream grammarText)
     result <- generate grammar
-    print $ unwords result
+    
+    let addSpaces = False
+    let fn = if addSpaces then unwords else concat
+
+    print $ fn result

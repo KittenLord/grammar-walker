@@ -66,6 +66,7 @@ getToken (' ':xs) = getToken xs
 getToken ('\t':xs) = getToken xs
 getToken ('\n':xs) = getToken xs
 getToken ('\r':xs) = getToken xs
+getToken ('-':'-':xs) = getToken $ dropWhile (/= '\n') xs
 getToken ('$':x:xs)
     | isAlpha x = let (rest, s) = readAlpha xs in
                   (rest, TerminalDef (x:s))
@@ -122,8 +123,9 @@ consumeSymbols g tokens = res
           res = go g [] tokens
 
 findSymbolInGrammar :: Grammar -> String -> Symbol
-findSymbolInGrammar (Grammar _ defs _) sname = if isNothing def then Nonterminal sname else Terminal sname
+findSymbolInGrammar (Grammar _ defs _) sname = if isNothing def then Nonterminal sname else Terminal gen
     where def = find (\(Definition t _) -> t == sname) defs
+          (Just (Definition _ gen)) = def
 
 
 
@@ -137,9 +139,9 @@ expandProduction :: Grammar -> Production -> IO [String]
 expandProduction g (Production symbols) = (sequenceA $ map (expandSymbol g) symbols) >>= (return . join)
 
 expandSymbol :: Grammar -> Symbol -> IO [String]
-expandSymbol (Grammar _ defs _) (Terminal t) = singleton <$> generateSymbol gen
-    -- HACK: ehhh
-    where (Just (Definition _ gen)) = find (\(Definition d _) -> d == t) defs
+expandSymbol (Grammar _ _ _) (Terminal gen) = do
+    s <- generateSymbol gen
+    return [s]
 expandSymbol g@(Grammar _ _ rules) (Nonterminal t) = do
     let (Just (Rule r prods)) = find (\(Rule r _) -> r == t) rules
     r <- randomIO
@@ -149,7 +151,8 @@ expandSymbol g@(Grammar _ _ rules) (Nonterminal t) = do
 
 -- TODO: Implement
 generateSymbol :: Gen -> IO String
-generateSymbol gen = pure gen
+generateSymbol gen = do
+    return gen
 
 
 
@@ -160,4 +163,4 @@ main = do
     grammarText <- hGetContents handle
     let (Just grammar) = parseGrammar mempty (getTokenStream grammarText)
     result <- generate grammar
-    print result
+    print $ unwords result
